@@ -18,9 +18,14 @@
 import os
 
 import fixtures
+from oslo_config import cfg
+import six
 import testtools
 
 _TRUE_VALUES = ('True', 'true', '1', 'yes')
+
+CONF = cfg.CONF
+CONF.import_opt('enabled', 'nova.api.openstack', group='osapi_v21')
 
 
 class TestCase(testtools.TestCase):
@@ -51,3 +56,9 @@ class TestCase(testtools.TestCase):
             self.useFixture(fixtures.MonkeyPatch('sys.stderr', stderr))
 
         self.log_fixture = self.useFixture(fixtures.FakeLogger())
+
+    def flags(self, **kw):
+        """Override flag variables for a test."""
+        group = kw.pop('group', None)
+        for k, v in six.iteritems(kw):
+            CONF.set_override(k, v, group)
